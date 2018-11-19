@@ -5,7 +5,6 @@ import cPickle as pickle
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
 from VLADlib.VLAD import encode, get_descriptors, compute_visual_dictionary, encode_one_image
-from dataset import PlushDataset
 from growing_network.GrowingWhenRequired import GWR
 from growing_network.utils import pca
 
@@ -112,8 +111,5 @@ if __name__ == '__main__':
     numberOfVisualWords = 60
     numMaxDescriptor = 60 * 8000
 
-    # dataset = PlushDataset()
     create_vlad_encoder(train_images,dictionary,proj,numMaxDescriptor,numberOfVisualWords,color='gray')
     train_gwr(train_images, train_labels, test_images, test_labels, dictionary, proj, gwr_file_name, color='gray')
-    #
-    # gwrRecognition(dataset, '/tmp/zucchini2.png')

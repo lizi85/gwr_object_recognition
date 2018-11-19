@@ -14,21 +14,30 @@ The code is tested with python 2.7
 4) istall imageio ``` conda install -c conda-forge imageio ```
 5) (optional) ``` conda install -c conda-forge matplotlib ```
 
-### Testing with mnist
+### Example with mnist
 1) install ``` pip install mnist  ```
 
-
-#### Object recognition
-
-Create your own implementation of 
+2) train 
 ```python
- from dataset import Dataset
- 
- class MyDataset(Dataset):
-    def __init__(self):
-        # TODO: my config based on Dataset filds
+import mnist
+train_images = mnist.train_images()
+train_labels = mnist.train_labels()
+test_images = mnist.test_images()
+test_labels = mnist.test_labels()
+
+dictionary = '/tmp/mnist_dictionary'
+proj = '/tmp/mnist_projection'
+gwr_file_name = '/tmp/mnist_gwr'
+numberOfVisualWords = 60
+numMaxDescriptor = 60 * 8000
+
+create_vlad_encoder(train_images,dictionary,proj,numMaxDescriptor,numberOfVisualWords,color='gray')
+train_gwr(train_images, train_labels, test_images, test_labels, dictionary, proj, gwr_file_name, color='gray')
  
  ```
+ 
+ 3) test
+ 
 
 ### References
 
