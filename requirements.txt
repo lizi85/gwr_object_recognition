@@ -1,0 +1,5 @@
+scipy == 1.1.0
+numpy == 1.15.2
+sklearn == 0.19.1
+tqdm
+glob2
