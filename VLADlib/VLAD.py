@@ -72,7 +72,6 @@ def get_descriptors(images, threads, color='gray', numMaxDescriptor=-1):
                           desc="[{} CPUs] Extracting descriptors".format(threads), total=len(data)):
             if descs is not None:
                 descriptors.extend(descs)
-
         pool.close()
 
     #list to array
@@ -103,7 +102,10 @@ def encode_one_image(args):
     """
     imagePath, visualDictionary, projection, color = args
 
-    im = imread(imagePath)
+    if isinstance(imagePath, basestring):
+        im = imread(imagePath)
+    else:
+        im = imagePath
     kp, des = phow(im, color=color)
 
     if des is not None:
@@ -140,7 +142,7 @@ def encode(files, visualDictionary, projection=None, threads = 1, color='gray'):
     else:
         pool = multiprocessing.Pool(threads)
 
-        data = [(f, visualDictionary, projection) for f in files]
+        data = [(f, visualDictionary, projection, color) for f in files]
 
         for descrs, imPath in tqdm(pool.imap_unordered(encode_one_image, data),
                                   desc="[{} CPUs] Calculating VLAD descriptors".format(threads), total=len(data)):
