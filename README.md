@@ -19,21 +19,23 @@ The code is tested with python 2.7
 
 2) train 
 ```python
-import mnist
-train_images = mnist.train_images()
-train_labels = mnist.train_labels()
-test_images = mnist.test_images()
-test_labels = mnist.test_labels()
+    import mnist
 
-dictionary = '/tmp/mnist_dictionary'
-proj = '/tmp/mnist_projection'
-gwr_file_name = '/tmp/mnist_gwr'
-numberOfVisualWords = 60
-numMaxDescriptor = 60 * 8000
+    train_images = mnist.train_images()
+    train_labels = mnist.train_labels()
 
-create_vlad_encoder(train_images,dictionary,proj,numMaxDescriptor,numberOfVisualWords,color='gray')
-train_gwr(train_images, train_labels, test_images, test_labels, dictionary, proj, gwr_file_name, color='gray')
- 
+    test_images = mnist.test_images()
+    test_labels = mnist.test_labels()
+
+    dictionary = '/tmp/mnist_dictionary'
+    proj = '/tmp/mnist_projection'
+    gwr_file_name = '/tmp/mnist_gwr'
+    numberOfVisualWords = 6
+    numMaxDescriptor = numberOfVisualWords * 800
+    color = 'gray'
+
+    create_vlad_encoder(train_images, dictionary, proj, numMaxDescriptor, numberOfVisualWords, color)
+    train_gwr(train_images, train_labels, test_images, test_labels, dictionary, proj, gwr_file_name, color)
  ```
  
  3) test

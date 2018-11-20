@@ -1,7 +1,7 @@
-import os
-import numpy as np
 import cPickle as pickle
+import os
 
+import numpy as np
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
 from VLADlib.VLAD import encode, get_descriptors, compute_visual_dictionary, encode_one_image
@@ -9,8 +9,8 @@ from growing_network.GrowingWhenRequired import GWR
 from growing_network.utils import pca
 
 
-def train_gwr(train_im,train_lbl, test_im, test_lbl, dictionary_file_name,projection_file_name,gwr_file_name,color='gray'):
-
+def train_gwr(train_im, train_lbl, test_im, test_lbl, dictionary_file_name, projection_file_name, gwr_file_name,
+              color='gray', threads=8):
     if not os.path.isfile(dictionary_file_name + '.pkl') or not os.path.isfile(projection_file_name + '.npy'):
         raise Exception('Visual dictionary and pca projection matrix not found!')
     else:
@@ -18,11 +18,10 @@ def train_gwr(train_im,train_lbl, test_im, test_lbl, dictionary_file_name,projec
         projections = np.load(projection_file_name + '.npy')
 
     print("####### encoding training dataset #######")
-    data, images = encode(train_im, visualDictionary, projections, threads=8, color=color)
-
+    data, images = encode(train_im, visualDictionary, projections, threads=threads, color=color)
 
     print("####### encoding testing dataset #######")
-    data_test, _ = encode(test_im, visualDictionary, projections, threads=8, color=color)
+    data_test, _ = encode(test_im, visualDictionary, projections, threads=threads, color=color)
     X = np.asarray(data)
     Y = np.asarray(train_lbl)
     X_test = np.asarray(data_test)
@@ -31,7 +30,7 @@ def train_gwr(train_im,train_lbl, test_im, test_lbl, dictionary_file_name,projec
     if not os.path.isfile(gwr_file_name + '.p'):
         print '####### Training the GWR network #######'
         gwr = GWR()
-        gwr.initialise_network(habituation_threshold=0.1, insertion_threshold=0.95, max_nodes=15000, max_age=100)
+        gwr.initialise_network(habituation_threshold=0.1, insertion_threshold=0.82, max_nodes=15000, max_age=100)
         gwr.train(x=X, y=Y, max_epoch=50, random_initialization=False)
         print '####### Saving the GWR network #######'
         gwr.save_network(gwr_file_name)
@@ -50,10 +49,9 @@ def train_gwr(train_im,train_lbl, test_im, test_lbl, dictionary_file_name,projec
     print('******************************************')
 
 
-def create_vlad_encoder(files, dictionary_file_name,projection_file_name,numMaxDescriptor,numberOfVisualWords,color='gray',threads = 8):
-
+def create_vlad_encoder(files, dictionary_file_name, projection_file_name, numMaxDescriptor, numberOfVisualWords,
+                        color='gray', threads=8):
     if not os.path.isfile(dictionary_file_name + '.pkl'):
-
         print ("####### Extracting the descriptors #######")
         descriptors = get_descriptors(files, threads, numMaxDescriptor=numMaxDescriptor, color=color)
         print descriptors.shape
@@ -73,7 +71,6 @@ def create_vlad_encoder(files, dictionary_file_name,projection_file_name,numMaxD
 
 
 def gwrRecognition(dataset, imagePath):
-
     if not os.path.isfile(dataset.dictionary + '.pkl') or not os.path.isfile(dataset.proj + '.npy'):
         raise Exception('Visual dictionary and pca projection matrix not found!')
     else:
@@ -85,31 +82,12 @@ def gwrRecognition(dataset, imagePath):
     else:
         gwr = GWR.load_network(dataset.trained_network_path)
 
-    descs, _ = encode_one_image((imagePath,  visualDictionary,  projections))
+    descs, _ = encode_one_image((imagePath, visualDictionary, projections))
     _, pred_label, _ = gwr.classify(descs.reshape(1, len(descs)))
 
-    for object_name, object_id in  dataset.object_types.items():
+    for object_name, object_id in dataset.object_types.items():
         if object_id == pred_label[0]:
             print(object_name)
 
     return pred_label[0]
 
-
-if __name__ == '__main__':
-
-    import mnist
-
-    train_images = mnist.train_images()
-    train_labels = mnist.train_labels()
-
-    test_images = mnist.test_images()
-    test_labels = mnist.test_labels()
-
-    dictionary = '/tmp/mnist_dictionary'
-    proj = '/tmp/mnist_projection'
-    gwr_file_name = '/tmp/mnist_gwr'
-    numberOfVisualWords = 60
-    numMaxDescriptor = 60 * 8000
-
-    create_vlad_encoder(train_images,dictionary,proj,numMaxDescriptor,numberOfVisualWords,color='gray')
-    train_gwr(train_images, train_labels, test_images, test_labels, dictionary, proj, gwr_file_name, color='gray')
